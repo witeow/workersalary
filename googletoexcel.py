@@ -98,13 +98,13 @@ for key, value in workerpay_dict.items():
 
 for i in range(len(locations)):
         temp = copy.deepcopy(template)
-        dict_locations.append(template)
+        dict_locations.append(temp)
         
 def duplicates(lst, item):
         return [i for i, x in enumerate(lst) if x == item]
 
 # filter each data row in google excel and add values to respective worksites
-for row in values[1:2]:
+for row in values[1:]:
         if len(row) == 7:
                 print(row)
                 worksite_index =locations.index(row[3])
@@ -169,4 +169,3 @@ df.to_excel (r'55 Lentor Way.xlsx', index = False, header=True)
 df = pd.DataFrame(dict_locations[1], columns = dict_locations[0].keys())
 df.to_excel (r'142 Rangoon Road.xlsx', index = False, header=True)
                 
-# current issue is that dictionary is being duplicated instead of seperately updated (update to 55 lentor way will update 142 rangoon road also)
