@@ -97,16 +97,18 @@ for key, value in workerpay_dict.items():
         add_name(key, value, template)
 
 for i in range(len(locations)):
-        temp = copy.deepcopy(template)
-        dict_locations.append(temp)
+        temp_sheet = copy.deepcopy(template)
+        dict_locations.append(temp_sheet)
         
 def duplicates(lst, item):
         return [i for i, x in enumerate(lst) if x == item]
 
 # filter each data row in google excel and add values to respective worksites
 for row in values[1:]:
+        # adjust to filter by name
+        # if row[1] == 'Islam':
+        #         print(row)
         if len(row) == 7:
-                print(row)
                 worksite_index =locations.index(row[3])
                 worksite_OT_index = locations.index(row[5])
 
@@ -118,9 +120,9 @@ for row in values[1:]:
                         working_day += working_day_list[i]
                 working_day = int(working_day)
 
-                print(worksite_index)
-                print(worksite_OT_index)
-                print(working_day)
+                # print(worksite_index)
+                # print(worksite_OT_index)
+                # print(working_day)
 
                 # data cleaning for that particular row (change "" to "0")
                 if row[6] == "":
@@ -143,7 +145,7 @@ for row in values[1:]:
                         name_index = dict_locations[worksite_index]["Names"].index(row[1] + " (OT)")
                         dict_locations[worksite_index][working_day][name_index] = working_hours_OT
         else:
-                print(row)
+                # print(row)
                 worksite_index =locations.index(row[3])
 
                 # extract day from the string
@@ -154,8 +156,8 @@ for row in values[1:]:
                         working_day += working_day_list[i]
                 working_day = int(working_day)
 
-                print(worksite_index)
-                print(working_day)
+                # print(worksite_index)
+                # print(working_day)
 
                 working_hours = int(row[4])
 
@@ -163,9 +165,55 @@ for row in values[1:]:
                 name_index = dict_locations[worksite_index]["Names"].index(row[1])
                 dict_locations[worksite_index][working_day][name_index] = working_hours
 
-df = pd.DataFrame(dict_locations[0], columns = dict_locations[0].keys())
-df.to_excel (r'55 Lentor Way.xlsx', index = False, header=True)
+# df = pd.DataFrame(dict_locations[0], columns = dict_locations[0].keys())
+# df.to_excel (r'55 Lentor Way.xlsx', index = False, header=True)
 
-df = pd.DataFrame(dict_locations[1], columns = dict_locations[0].keys())
-df.to_excel (r'142 Rangoon Road.xlsx', index = False, header=True)
+# df = pd.DataFrame(dict_locations[1], columns = dict_locations[0].keys())
+# df.to_excel (r'142 Rangoon Road.xlsx', index = False, header=True)
+
+
+# calculating total hours per worker
+def calc_total_hours(dict_loc):
+        for location in dict_loc:
+                no_of_workers = len(location['Names'])
+                for day in range(1,32):
+                        for worker in range(no_of_workers):
+                                location['Hours'][worker] += location[day][worker]
+calc_total_hours(dict_locations)
+
+# calculating pay per worker
+def calc_pay(dict_loc):
+        for location in dict_loc:
+                no_of_workers = len(location['Names'])
+                for worker in range(no_of_workers):
+                        location['Pay'][worker] = location['Hours'][worker] * location['Pay/hour'][worker]
+calc_pay(dict_locations)
+
+# calculating total pay per worker
+def calc_total_pay(dict_loc):
+        for location in dict_loc:
+                worker_list = workerpay_dict.keys()
+                for worker in range(len(location['Names'])):
+                        if location['Names'][worker] in worker_list:
+                                # print(location['Names'][worker])
+                                if location['Names'][worker] == "赵家军" or location['Names'][worker] == "王玉镇":
+                                        location['Total Pay'][worker] = location['Pay'][worker] 
+                                else:
+                                        location['Total Pay'][worker] = location['Pay'][worker] + location['Pay'][worker+1]
+calc_total_pay(dict_locations)
+
+# creating individual summary 
+def individual_summary(loc, dic_loc, loc_temp):
+        temp = copy.deepcopy(loc_temp)
+        dic_loc.append(temp)
+        loc.append("Individual Summary")
+
+individual_summary(locations, dict_locations, template)
+print(dict_locations[0])
+# writing all workplaces to one excel
+writer = pd.ExcelWriter('May 2021.xlsx', engine='xlsxwriter')
+for location in range(len(locations)):
+        df = pd.DataFrame(dict_locations[location], columns = dict_locations[0].keys())
+        df.to_excel (writer, sheet_name=locations[location])
+writer.save()
                 
