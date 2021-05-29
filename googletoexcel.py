@@ -207,9 +207,17 @@ def individual_summary(loc, dic_loc, loc_temp):
         temp = copy.deepcopy(loc_temp)
         dic_loc.append(temp)
         loc.append("Individual Summary")
+        # print(dic_loc[6])
+        for worker in range(len(dic_loc[0]['Names'])):
+                for worksite in range(len(loc)-1):
+                        for day in range(1,32):
+                                dic_loc[len(loc)-1][day][worker] += dic_loc[worksite][day][worker]
+                        dic_loc[len(loc)-1]['Hours'][worker] += dic_loc[worksite]['Hours'][worker]
+                        dic_loc[len(loc)-1]['Pay'][worker] += dic_loc[worksite]['Pay'][worker]
+                        dic_loc[len(loc)-1]['Total Pay'][worker] += dic_loc[worksite]['Total Pay'][worker]
 
 individual_summary(locations, dict_locations, template)
-print(dict_locations[0])
+
 # writing all workplaces to one excel
 writer = pd.ExcelWriter('May 2021.xlsx', engine='xlsxwriter')
 for location in range(len(locations)):
